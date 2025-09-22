@@ -1,270 +1,45 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Eyewear Catalog</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#f6f8fb; --card:#ffffff; --accent:#0f62fe; --muted:#6b7280;
-      --gap:18px; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-    }
-    body{margin:0;background:var(--bg);color:#111;line-height:1.3}
-    header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:20px 28px;background:linear-gradient(180deg,#fff,transparent);gap:12px}
-    h1{margin:0;font-size:20px}
-    .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .controls input[type="search"], .controls select, .controls input[type="number"]{
-      padding:8px 10px;border-radius:8px;border:1px solid #e6e9ef;background:white;font-size:14px;
-    }
-    .container{padding:22px;max-width:1200px;margin:0 auto}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-    .card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(18,20,28,0.06);cursor:pointer;display:flex;flex-direction:column;transition:transform .12s ease,box-shadow .12s ease}
-    .card:hover{transform:translateY(-6px);box-shadow:0 14px 30px rgba(18,20,28,0.09)}
-    .thumb{width:100%;height:160px;object-fit:cover;background:#f2f4f7}
-    .card-body{padding:12px 14px;display:flex;flex-direction:column;gap:6px}
-    .brand{font-weight:600;font-size:14px}
-    .model{color:var(--muted);font-size:13px}
-    .meta{font-size:13px;color:var(--muted)}
-    .price{margin-left:auto;font-weight:700;color:var(--accent)}
-    .topbar{display:flex;gap:8px;align-items:center}
-    .badge{font-size:12px;padding:6px 8px;border-radius:999px;background:#f1f5ff;color:var(--accent);border:1px solid rgba(15,98,254,0.08)}
-    /* modal */
-    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(12,14,20,0.45)}
-    .modal.open{display:flex}
-    .modal-card{width:min(960px,96%);background:var(--card);border-radius:12px;overflow:hidden;display:flex;gap:0;max-height:90vh}
-    .modal-left{flex:1;min-width:320px}
-    .modal-left img{width:100%;height:100%;object-fit:cover}
-    .modal-right{width:360px;padding:18px;display:flex;flex-direction:column;gap:10px}
-    .close-btn{border:0;background:transparent;font-weight:700;font-size:18px;cursor:pointer;align-self:flex-end}
-    footer{padding:18px 28px;color:var(--muted);font-size:13px;text-align:center}
-    @media (max-width:700px){
-      .modal-card{flex-direction:column}
-      .modal-right{width:100%}
-    }
-    /* helper */
-    .hidden{display:none}
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; box-shadow: 2px 2px 6px #ccc; }
+    .card img { width: 100%; height: auto; border-radius: 4px; }
+    .price { font-weight: bold; margin-top: 5px; }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>My Eyewear Catalog</h1>
-      <div style="color:var(--muted);font-size:13px;margin-top:6px">Browse frames — search, filter, click for details</div>
-    </div>
-
-    <div class="controls" aria-hidden="false">
-      <input id="search" type="search" placeholder="Search brand, model, color..." style="min-width:220px">
-      <select id="brandFilter"><option value="">All brands</option></select>
-      <select id="shapeFilter"><option value="">All shapes</option></select>
-      <input id="minPrice" type="number" placeholder="Min $" style="width:90px">
-      <input id="maxPrice" type="number" placeholder="Max $" style="width:90px">
-      <select id="sortSelect" title="Sort">
-        <option value="relevance">Sort: Relevance</option>
-        <option value="price-asc">Price ↑</option>
-        <option value="price-desc">Price ↓</option>
-        <option value="brand">Brand</option>
-      </select>
-    </div>
-  </header>
-
-  <main class="container">
-    <div id="resultsSummary" style="margin-bottom:12px;color:var(--muted)"></div>
-    <div id="grid" class="grid" role="list"></div>
-    <div id="noResults" class="hidden" style="padding:40px;text-align:center;color:var(--muted)">No frames match your filters.</div>
-  </main>
-
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true">
-      <div class="modal-left">
-        <img id="modalImage" src="" alt="">
-      </div>
-      <div class="modal-right">
-        <button id="closeModal" class="close-btn" aria-label="Close">✕</button>
-        <div id="modalBrand" style="font-weight:700;font-size:18px"></div>
-        <div id="modalModel" style="color:var(--muted);font-size:14px"></div>
-        <div style="font-size:15px;color:var(--muted)"><span id="modalShape"></span> • <span id="modalColor"></span></div>
-        <div style="display:flex;gap:12px;align-items:center">
-          <div style="font-size:20px;font-weight:800;color:var(--accent)" id="modalPrice"></div>
-          <div id="modalAvailability" class="badge" style="font-size:13px"></div>
-        </div>
-        <div id="modalMaterial" style="color:var(--muted)"></div>
-        <p id="modalDescription" style="margin-top:6px;color:#222"></p>
-        <div style="margin-top:auto;display:flex;gap:10px">
-          <a id="mailtoBtn" href="#" style="padding:10px 12px;border-radius:8px;text-decoration:none;background:var(--accent);color:white;font-weight:600">Request info</a>
-          <button id="closeModal2" style="padding:10px 12px;border-radius:8px;border:1px solid #e6e9ef;background:white;cursor:pointer">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <footer>Manage your CSV at <code>data/frames.csv</code>. Replace images with real product images (host them publicly or under <code>assets/</code>).</footer>
-
-  <!-- PapaParse for robust CSV parsing -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <h1>Eyewear Catalog</h1>
+  <div id="catalog" class="grid"></div>
 
   <script>
-  // Configuration
-  const CSV_PATH = 'data/frames.csv'; // change to an absolute URL (Google Sheets published CSV) if you like
+    async function loadCatalog() {
+      const response = await fetch("data/frames.csv");
+      const text = await response.text();
+      const rows = text.trim().split("\n").slice(1); // skip header
 
-  // State
-  let frames = [];
-  let filtered = [];
+      const catalog = document.getElementById("catalog");
 
-  // Helpers
-  function $(sel){return document.querySelector(sel)}
-  function $all(sel){return Array.from(document.querySelectorAll(sel))}
-
-  // Load CSV then init UI
-  async function load() {
-    try {
-      const res = await fetch(CSV_PATH);
-      if(!res.ok) throw new Error('Could not fetch CSV: ' + res.status);
-      const text = await res.text();
-      const parsed = Papa.parse(text, {header:true, skipEmptyLines:true});
-      frames = parsed.data.map(r => ({
-        id: (r.id || '').trim(),
-        brand: (r.brand || '').trim(),
-        model: (r.model || '').trim(),
-        shape: (r.shape || '').trim(),
-        color: (r.color || '').trim(),
-        price: parseFloat((r.price || '').replace(/[^0-9.-]+/g,'')) || 0,
-        image: (r.image_url || r.image || '').trim() || 'https://via.placeholder.com/800x600?text=No+image',
-        material: (r.material || '').trim(),
-        description: (r.description || '').trim(),
-        availability: (r.availability || 'In stock').trim()
-      }));
-      buildFilters();
-      applyFilters();
-      attachEventHandlers();
-    } catch(err){
-      document.getElementById('grid').innerHTML = '<div style="padding:20px;color:#b00">Error loading catalog: '+err.message+'</div>';
-      console.error(err);
+      rows.forEach(row => {
+        const [id, brand, model, shape, color, price, image_url, material, description, availability] = row.split(",");
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${image_url}" alt="${brand} ${model}">
+          <h3>${brand} - ${model}</h3>
+          <p>${description}</p>
+          <p class="price">$${price}</p>
+          <p><strong>Shape:</strong> ${shape}, <strong>Color:</strong> ${color}</p>
+          <p><strong>Availability:</strong> ${availability}</p>
+        `;
+        catalog.appendChild(card);
+      });
     }
-  }
 
-  // Build filter dropdown values from CSV content
-  function buildFilters(){
-    const brands = Array.from(new Set(frames.map(f => f.brand).filter(Boolean))).sort();
-    const shapes = Array.from(new Set(frames.map(f => f.shape).filter(Boolean))).sort();
-    const brandSel = $('#brandFilter');
-    const shapeSel = $('#shapeFilter');
-    for(const b of brands){
-      const o = document.createElement('option'); o.value = b; o.textContent = b; brandSel.appendChild(o);
-    }
-    for(const s of shapes){
-      const o = document.createElement('option'); o.value = s; o.textContent = s; shapeSel.appendChild(o);
-    }
-  }
-
-  // Render frames array into grid
-  function render(list){
-    const grid = $('#grid');
-    grid.innerHTML = '';
-    if(!list.length){
-      $('#noResults').classList.remove('hidden');
-      $('#resultsSummary').textContent = 'No frames found';
-      return;
-    }
-    $('#noResults').classList.add('hidden');
-    $('#resultsSummary').textContent = `${list.length} frame${list.length>1?'s':''} shown`;
-    for(const f of list){
-      const card = document.createElement('article');
-      card.className = 'card';
-      card.setAttribute('role','listitem');
-      card.innerHTML = `
-        <img class="thumb" src="${escapeHtml(f.image)}" alt="${escapeHtml(f.brand+' '+f.model)}" loading="lazy">
-        <div class="card-body">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div>
-              <div class="brand">${escapeHtml(f.brand)}</div>
-              <div class="model">${escapeHtml(f.model)}</div>
-              <div class="meta">${escapeHtml(f.shape)} • ${escapeHtml(f.color)}</div>
-            </div>
-            <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end">
-              <div class="price">$${Number(f.price).toFixed(2)}</div>
-              <div style="font-size:12px;color:var(--muted)">${escapeHtml(f.availability)}</div>
-            </div>
-          </div>
-        </div>
-      `;
-      card.addEventListener('click', ()=>openModal(f));
-      grid.appendChild(card);
-    }
-  }
-
-  // Simple HTML escape
-  function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
-
-  // Filtering & sorting
-  function applyFilters(){
-    const q = $('#search').value.trim().toLowerCase();
-    const brand = $('#brandFilter').value;
-    const shape = $('#shapeFilter').value;
-    const minP = parseFloat($('#minPrice').value) || 0;
-    const maxP = parseFloat($('#maxPrice').value) || Infinity;
-    const sortBy = $('#sortSelect').value;
-
-    filtered = frames.filter(f=>{
-      if(brand && f.brand !== brand) return false;
-      if(shape && f.shape !== shape) return false;
-      if(f.price < minP || f.price > maxP) return false;
-      if(q){
-        const hay = (f.brand+' '+f.model+' '+f.shape+' '+f.color+' '+f.description).toLowerCase();
-        if(!hay.includes(q)) return false;
-      }
-      return true;
-    });
-
-    // sort
-    if(sortBy === 'price-asc') filtered.sort((a,b)=>a.price-b.price);
-    else if(sortBy === 'price-desc') filtered.sort((a,b)=>b.price-a.price);
-    else if(sortBy === 'brand') filtered.sort((a,b)=>a.brand.localeCompare(b.brand));
-    // else keep original order
-
-    render(filtered);
-  }
-
-  // Modal
-  function openModal(frame){
-    $('#modalImage').src = frame.image;
-    $('#modalImage').alt = `${frame.brand} ${frame.model}`;
-    $('#modalBrand').textContent = frame.brand;
-    $('#modalModel').textContent = frame.model;
-    $('#modalShape').textContent = frame.shape;
-    $('#modalColor').textContent = frame.color;
-    $('#modalPrice').textContent = '$' + Number(frame.price).toFixed(2);
-    $('#modalAvailability').textContent = frame.availability;
-    $('#modalMaterial').textContent = frame.material ? 'Material: ' + frame.material : '';
-    $('#modalDescription').textContent = frame.description;
-    // mailto: prefilled (replace email@example.com)
-    $('#mailtoBtn').href = `mailto:yourstore@example.com?subject=Frame inquiry: ${encodeURIComponent(frame.brand+' '+frame.model)}&body=Hi%2C%20I%20have%20a%20question%20about%20the%20frame%20${encodeURIComponent(frame.brand+' '+frame.model)}.`;
-    $('#modal').classList.add('open');
-    $('#modal').setAttribute('aria-hidden','false');
-  }
-  function closeModal(){
-    $('#modal').classList.remove('open');
-    $('#modal').setAttribute('aria-hidden','true');
-  }
-
-  // Events
-  function attachEventHandlers(){
-    $('#search').addEventListener('input', applyFilters);
-    $('#brandFilter').addEventListener('change', applyFilters);
-    $('#shapeFilter').addEventListener('change', applyFilters);
-    $('#minPrice').addEventListener('input', applyFilters);
-    $('#maxPrice').addEventListener('input', applyFilters);
-    $('#sortSelect').addEventListener('change', applyFilters);
-    $('#closeModal').addEventListener('click', closeModal);
-    $('#closeModal2').addEventListener('click', closeModal);
-    // close modal on background click
-    $('#modal').addEventListener('click', (e)=> { if(e.target === $('#modal')) closeModal(); });
-    // keyboard ESC
-    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
-  }
-
-  // Start
-  document.addEventListener('DOMContentLoaded', load);
+    loadCatalog();
   </script>
 </body>
 </html>
