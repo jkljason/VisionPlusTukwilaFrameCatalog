@@ -1,7 +1,4 @@
 id,brand,model,shape,color,price,image_url,material,description,availability
-1,Ray-Ban,Classic RB2140,Square,Black,149.99,assets/rayban1.jpg,Acetate,"Classic square frame with medium fit",In stock
-2,Oakley,Holbrook,Rectangle,Tortoise,129.00,https://via.placeholder.com/800x600?text=Oakley+Holbrook,Acetate,"Sporty rectangle frame",Limited
-3,Persol,PO3019S,Round,Brown,199.00,https://via.placeholder.com/800x600?text=Persol+PO3019S,Cellulose Acetate,"Italian handcrafted round frame",Preorder
-4,Moscot,Lemtosh,Round,Black,179.00,https://via.placeholder.com/800x600?text=Moscot+Lemtosh,Acetate,"Iconic round frame",In stock
-5,Warby Parker,Chamberlain,Square,Blue,95.00,https://via.placeholder.com/800x600?text=Warby+Chamberlain,Plastic,"Stylish everyday frame",In stock
-6,LocalBox,Indie101,Cat-eye,Red,89.00,https://via.placeholder.com/800x600?text=Indie101,Metal,"Bold cat-eye frame",Out of stock
+1,Ray-Ban,Classic RB2140,Square,Black,149.99,assets/rayban1.jpg,Acetate,"Classic square frame",In stock
+2,Oakley,Holbrook,Rectangle,Tortoise,129.00,assets/oakley1.jpg,Acetate,"Sporty rectangle frame",Limited
+3,Persol,PO3019S,Round,Brown,199.00,assets/persol1.jpg,Cellulose Acetate,"Handcrafted Italian frame",Preorder
